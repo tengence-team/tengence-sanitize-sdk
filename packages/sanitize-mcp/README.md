@@ -74,6 +74,37 @@ SANITIZE_MCP_PORT=8788 SANITIZE_MCP_TOKEN=sk-xxx \
 | `sanitize_audit_export` | 导出审计为文件 | 导出文件路径 |
 | `sanitize_restore` * | 本地还原 enc 密文（明文！） | 仅 `SANITIZE_MCP_ENABLE_RESTORE=1` 时注册 |
 
+### 参数速查（每个工具怎么调）
+
+| 工具 | 参数 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `sanitize_config_info` | `config` | ✅ | `sanitize.config.json` 绝对路径；返回规则摘要 / configFingerprint / masking_meta |
+| `sanitize_dry_run` | `config`、`input` | ✅ | 输入文件（CSV/JSON/JSONL/XLSX）；返回命中统计 + **脱敏后**样例 + unmatchedFields |
+| | `input_format` | — | 显式指定格式（`csv`/`json`/`jsonl`/`xlsx`），缺省自动探测 |
+| `sanitize_file` | `config`、`input`、`output` | ✅ | 流式脱敏，返回 batchId/行数/告警/审计路径 |
+| | `input_format` | — | 同上 |
+| `sanitize_upload` | `config`、`input` | ✅ | `input` 为**已脱敏**文件路径；返回 accepted/rejected |
+| | `push_url` | — | 覆盖上传端点（默认 `https://api.mossego.com/v1/push/data`） |
+| `sanitize_audit_list` | `dir` | — | 审计目录（默认 `~/.tengence/sanitize/audits`） |
+| `sanitize_audit_export` | `dir`、`format` | — | `format`: `json`\|`csv`（默认 json），导出到本地文件 |
+| `sanitize_restore` * | `field`、`value` | ✅ | 仅在 `SANITIZE_MCP_ENABLE_RESTORE=1` 时可用；`field` 为加密时字段路径，`value` 为 enc hex |
+
+> ⚠️ 任何工具都**不接受密钥/盐/apiKey 参数**——一律来自环境变量；工具参数里出现密钥会被视为错误用法。
+
+## AI 客户端接入引导（让 AI 自己会用）
+
+连接本服务后，客户端**自动**获得下面的能力，无需额外 skill：
+
+- **tools/list** → 6+1 个工具（上文）；**resources/list** → 4 类参考数据；**prompts/list** → 3 个提示词模板；每会话自动注入 `Implementation.instructions`（TOOL GROUPS + 规范流水线 + 安全红线）。
+
+典型任务路径（AI 可直接按此执行）：
+
+1. **生成/审阅配置**：用户说「帮我配脱敏」→ 触发 `sanitize_setup_config` prompt（先读 `sanitize://config-schema`，产出配置，用 `sanitize_config_info` 校验）。
+2. **脱敏一份文件（+ 上传）**：`sanitize_config_info(config)` → `sanitize_dry_run(config, input)`（确认 hits>0、unmatchedFields 为空，有漏配先补配）→ `sanitize_file(config, input, output)` → 用户确认后 `sanitize_upload(config, output)`。可触发 `sanitize_desensitize_file` prompt 一步到位。
+3. **审计核对**：`sanitize_audit_list` / 读 `sanitize://audit/{batchId}` → 汇总批次数/行数/命中/未命中/上传结果；可触发 `sanitize_verify_audit` prompt。
+
+「什么时候该用什么」的完整规则沉淀在：instructions（每会话）→ `sanitize://workflows`（按需）→ 三个 prompts（显式触发）。
+
 ## Prompts（提示词模板，3 个，用户显式触发）
 
 - `sanitize_setup_config` —— 为指定业务字段生成/审阅 `sanitize.config.json`；
@@ -86,6 +117,20 @@ SANITIZE_MCP_PORT=8788 SANITIZE_MCP_TOKEN=sk-xxx \
 - `sanitize://config-schema` —— 配置结构与字段路径规则（嵌套/数组）；
 - `sanitize://workflows` —— 规范流水线与安全红线；
 - `sanitize://audit/{batchId}` —— 单条审计记录（模板资源）。
+
+## 常见错误与处理（AI/运维排查速查）
+
+| 现象 | 原因 | 处理 |
+| --- | --- | --- |
+| 连接被拒（`legacy: reject`） | 客户端用 2025 世代 initialize 握手 | 客户端需支持 MCP 2026-07-28 并 pin 协议版本（如 SDK v2 `versionNegotiation.mode.pin = '2026-07-28'`） |
+| HTTP 请求 400/422「缺 `_meta`」 | 2026-07-28 每请求需 `_meta` 信封（protocolVersion/clientInfo/clientCapabilities） | 按协议补 `params._meta` 三键 |
+| HTTP 401 | 缺/错 `SANITIZE_MCP_TOKEN` | 请求头带 `Authorization: Bearer <token>` |
+| dry-run 出现 `unmatchedFields` | 数据里有配置未声明的字段 | 先补配再脱敏；⚠️ 扁平列名含点号（如列名 `contact.phone`）不会被嵌套路径匹配，改列名或改数据 |
+| 某字段 `hits: 0` 但数据里有值 | 字段路径不匹配，或字段过短（如 2 字姓名 mask 1/1 不脱敏） | 核对路径；姓名/短字段改用 hash 或 encrypt |
+| 上传返回 `ID_FIELD_MISSING` | 行缺少数据集主键字段（默认 `id`） | 数据补 `id` 列后重试 |
+| 上传返回 `UNAUTHORIZED` | 偶发瞬时状态，或 key 失效 | **先重试一次**；连续失败请用户核对数据集成应用 apiKey |
+| 上传返回 `INVALID_API_KEY` | key 无效 / 域名错误 | 确认用的是 `api.mossego.com` 且 key 为数据集成应用 apiKey，请用户核对 |
+| 读取 `.xls` 报错 | 老格式不支持 | 提示用户转 `.xlsx` |
 
 ## 协议
 

@@ -38,7 +38,8 @@ const prompts = [
           `为以下业务字段准备一份 sanitize.config.json：\n${args.fields}\n` +
             `1) 先读资源 sanitize://config-schema 了解字段路径与规则参数写法；\n` +
             `2) 生成配置文件并写入 ${args.output}（仅字段声明与参数，密钥一律用环境变量名引用，禁止把密钥写进文件或参数）；\n` +
-            `3) 用 sanitize_config_info(config=${args.output}) 校验，向用户汇报规则摘要与 configFingerprint。`
+            `3) 用 sanitize_config_info(config=${args.output}) 校验，向用户汇报规则摘要与 configFingerprint。\n` +
+            `注意：姓名等短字段建议用 hash（mask 在字段过短时可能原文透传，keep 0/0 输出「*+原文」仍含明文）；hash 需盐、encrypt 需密钥，一律用环境变量名引用，禁止把密钥写进文件或参数。`
         ),
       };
     },
