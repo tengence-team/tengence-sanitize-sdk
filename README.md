@@ -63,7 +63,7 @@ tengence-sanitize audit --export csv
     { "fields": ["order_no"], "method": "encrypt", "params": { "keyEnv": "TENGENCE_SANITIZE_KEY" } },
     { "fields": ["remark"], "method": "preserve" }
   ],
-  "upload": { "pushUrl": "https://api.tengence.com/v1/push/data" },
+  "upload": { "pushUrl": "https://api.mossego.com/v1/push/data" },
   "audit": { "dir": "./.tengence-sanitize-audit" }
 }
 ```
@@ -86,7 +86,7 @@ tengence-sanitize audit --export csv
 
 复用现有批量推送接口（不新建）：
 
-- `POST {pushUrl}`，默认 `https://api.tengence.com/v1/push/data`
+- `POST {pushUrl}`，默认 `https://api.mossego.com/v1/push/data`
 - `Authorization: Bearer {应用 apiKey}`
 - 请求体：`{ data: [...], batch_id, config_fingerprint, masking_meta }`
 - 分片：按 `batchSize`（默认 1000）与字节上限双条件切片

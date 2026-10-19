@@ -56,7 +56,7 @@ const prompts = [
         .string()
         .optional()
         .describe('脱敏后是否上传到批量推送接口："true"/"false"（默认 "false"）'),
-      push_url: z.string().optional().describe('上传接口覆盖（默认 https://api.tengence.com/v1/push/data）'),
+      push_url: z.string().optional().describe('上传接口覆盖（默认 https://api.mossego.com/v1/push/data）'),
     }),
     run(args) {
       const upload = args.upload === 'true';

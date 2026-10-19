@@ -9,6 +9,6 @@
     { "fields": ["remark"], "method": "preserve" }
   ],
   "dryRun": false,
-  "upload": { "pushUrl": "https://api.tengence.com/v1/push/data" },
+  "upload": { "pushUrl": "https://api.mossego.com/v1/push/data" },
   "audit": { "enabled": true, "dir": "./.tengence-sanitize-audit" }
 }

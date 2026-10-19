@@ -122,6 +122,23 @@ describe("createSanitizer", () => {
     globalThis.fetch = origFetch;
   });
 
+  it("upload：真实网关契约回归——mossego 成功码 code:'SUCCESS' 判定为成功", async () => {
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = (async () => {
+      return new Response(JSON.stringify({ code: "SUCCESS", message: "Operation successful" }), {
+        status: 200,
+        headers: { "content-type": "application/json" }
+      });
+    }) as typeof fetch;
+
+    const s = createSanitizer({ config, apiKey: "sk-test", pushUrl: "https://api.mossego.com/v1/push/data" });
+    const result = await s.upload([{ phone: "13800138000", id: "1" }]);
+    expect(result.accepted).toBe(1);
+    expect(result.rejected).toBeUndefined();
+
+    globalThis.fetch = origFetch;
+  });
+
   it("upload：4xx 业务码不重试，回报拒绝明细", async () => {
     const origFetch = globalThis.fetch;
     let count = 0;

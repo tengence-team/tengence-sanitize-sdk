@@ -98,7 +98,7 @@ const fixedResources = [
               '    { "fields": ["id_card"], "method": "mask", "params": { "keepFirst": 3, "keepLast": 4 } },',
               '    { "fields": ["contact.phone", "items[*].price"], "method": "encrypt", "params": { "keyEnv": "TENGENCE_SANITIZE_KEY" } }',
               '  ],',
-              '  "upload": { "pushUrl": "https://api.tengence.com/v1/push/data", "apiKeyEnv": "TENGENCE_API_KEY", "batchSize": 1000, "maxBatchPayloadBytes": 4194304, "maxRetries": 3, "timeoutMs": 30000 },',
+              '  "upload": { "pushUrl": "https://api.mossego.com/v1/push/data", "apiKeyEnv": "TENGENCE_API_KEY", "batchSize": 1000, "maxBatchPayloadBytes": 4194304, "maxRetries": 3, "timeoutMs": 30000 },',
               '  "audit": { "enabled": true, "dir": "~/.tengence/sanitize/audits" }',
               '}',
               '```',

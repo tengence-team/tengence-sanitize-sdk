@@ -25,7 +25,7 @@ program
   .option("--dry-run", "仅预览（命中统计 + 样例 + 未命中字段清单），不输出文件")
   .option("--upload", "脱敏后调用批量推送接口上传")
   .option("--api-key <key>", "应用 apiKey（优先于环境变量 TENGENCE_API_KEY）")
-  .option("--push-url <url>", "批量推送接口地址（默认 https://api.tengence.com/v1/push/data）")
+  .option("--push-url <url>", "批量推送接口地址（默认 https://api.mossego.com/v1/push/data）")
   .action(async (opts) => {
     try {
       const apiKey = opts.apiKey || undefined;

@@ -8,7 +8,8 @@
  */
 import type { RejectDetail, Row, UploadResult } from "./types";
 
-export const DEFAULT_PUSH_URL = "https://api.tengence.com/v1/push/data";
+/** 默认推送地址：mossego 网关（2026-10-19 真实契约实测确认；原 api.tengence.com 域名已废弃） */
+export const DEFAULT_PUSH_URL = "https://api.mossego.com/v1/push/data";
 
 export interface UploadContext {
   pushUrl: string;
@@ -49,14 +50,15 @@ interface RawResponse {
   text: string;
 }
 
+/** 成功业务码集合：0/200（文档假设）+ SUCCESS/OK（mossego 真实网关实测返回 code:"SUCCESS"） */
+const SUCCESS_CODES = new Set<unknown>([0, "0", 200, "200", "SUCCESS", "OK", "ok", "success"]);
+
 function isSuccessBody(body: unknown): boolean {
   if (body === null || body === undefined) return true;
   if (typeof body !== "object") return false;
   const code = (body as Record<string, unknown>).code;
-  if (code === undefined || code === null || code === "" || code === 0 || code === "0" || code === 200 || code === "200") {
-    return true;
-  }
-  return false;
+  if (code === undefined || code === null || code === "") return true;
+  return SUCCESS_CODES.has(code);
 }
 
 function sleep(ms: number): Promise<void> {
