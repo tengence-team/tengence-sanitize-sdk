@@ -1,4 +1,4 @@
-# sanitize-mcp 实施方案（待确认）
+# sanitize-mcp 实施方案（已确认）
 
 > 让 AI（MCP 客户端）通过 Model Context Protocol 调用 `@tengence/sanitize-sdk` 的本地脱敏能力。
 > 参考 `tengence-geo-agent/packages/geo-mcp` 的实施方式；按 **MCP 2026-07-28** 规范（当前最新修订，无状态核心）实现。
@@ -180,4 +180,4 @@ tengence-sanitize-sdk/
 | 2 | 工具划分 | **已确认：6 个 + 1 个开关控制的 `sanitize_restore`（共 7 个工具定义，默认注册 6 个）** |
 | 3 | 包位置 | **已确认：`packages/sanitize-mcp`（`@tengence/sanitize-mcp`，与 SDK/CLI 同仓库）** |
 | 4 | 传输 | **已确认：stdio + Streamable HTTP 双入口都做**（对齐 geo-mcp） |
-| 5 | Tasks 扩展 | **建议不做**（本地秒级操作，无长任务；理由见 §7）。**待你最终确认** |
+| 5 | Tasks 扩展 | **已确认：不做**（本地秒级操作，无长任务；理由见 §7） |

@@ -8,9 +8,14 @@
   ],
   "scripts": {
     "build": "npm run build -w @tengence/sanitize-sdk && npm run build -w @tengence/sanitize-cli",
-    "test": "npm run test -w @tengence/sanitize-sdk",
+    "test": "npm run test -ws --if-present",
     "typecheck": "npm run typecheck -ws --if-present"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tengence-team/tengence-sanitize-sdk.git"
+  },
+  "homepage": "https://github.com/tengence-team/tengence-sanitize-sdk",
   "engines": {
     "node": ">=18"
   },
