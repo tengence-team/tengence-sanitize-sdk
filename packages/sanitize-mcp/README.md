@@ -95,17 +95,18 @@ SANITIZE_MCP_PORT=8788 SANITIZE_MCP_TOKEN=sk-xxx \
 
 连接本服务后，客户端**自动**获得下面的能力，无需额外 skill：
 
-- **tools/list** → 6+1 个工具（上文）；**resources/list** → 4 类参考数据；**prompts/list** → 3 个提示词模板；每会话自动注入 `Implementation.instructions`（TOOL GROUPS + 规范流水线 + 安全红线）。
+- **tools/list** → 6+1 个工具（上文）；**resources/list** → 5 类参考数据；**prompts/list** → 4 个提示词模板；每会话自动注入 `Implementation.instructions`（TOOL GROUPS + 规范流水线 + 安全红线）。
 
 典型任务路径（AI 可直接按此执行）：
 
 1. **生成/审阅配置**：用户说「帮我配脱敏」→ 触发 `sanitize_setup_config` prompt（先读 `sanitize://config-schema`，产出配置，用 `sanitize_config_info` 校验）。
 2. **脱敏一份文件（+ 上传）**：`sanitize_config_info(config)` → `sanitize_dry_run(config, input)`（确认 hits>0、unmatchedFields 为空，有漏配先补配）→ `sanitize_file(config, input, output)` → 用户确认后 `sanitize_upload(config, output)`。可触发 `sanitize_desensitize_file` prompt 一步到位。
 3. **审计核对**：`sanitize_audit_list` / 读 `sanitize://audit/{batchId}` → 汇总批次数/行数/命中/未命中/上传结果；可触发 `sanitize_verify_audit` prompt。
+4. **验证脱敏-上报链路**：先读 `sanitize://testing-patterns`（已验证的测试/验证经验与真实网关契约）→ `sanitize_config_info` → `sanitize_dry_run` → `sanitize_file` → `sanitize_upload`；可触发 `sanitize_validate_linkage` prompt 一步到位。
 
 「什么时候该用什么」的完整规则沉淀在：instructions（每会话）→ `sanitize://workflows`（按需）→ 三个 prompts（显式触发）。
 
-## Prompts（提示词模板，3 个，用户显式触发）
+## Prompts（提示词模板，4 个，用户显式触发）
 
 - `sanitize_setup_config` —— 为指定业务字段生成/审阅 `sanitize.config.json`；
 - `sanitize_desensitize_file` —— 完整脱敏流程（校验 → 预览 → 脱敏 → 可选上传）；
@@ -116,6 +117,7 @@ SANITIZE_MCP_PORT=8788 SANITIZE_MCP_TOKEN=sk-xxx \
 - `sanitize://methods` —— 算法与输出长度（hash 32/64 hex、enc 2×(16+len) 手机号 54 hex、mask）；
 - `sanitize://config-schema` —— 配置结构与字段路径规则（嵌套/数组）；
 - `sanitize://workflows` —— 规范流水线与安全红线；
+- `sanitize://testing-patterns` —— 已验证的测试/验证经验（队列异步落盘、自动采集事件、jsdom 限制、真实网关契约表）；
 - `sanitize://audit/{batchId}` —— 单条审计记录（模板资源）。
 
 ## 常见错误与处理（AI/运维排查速查）

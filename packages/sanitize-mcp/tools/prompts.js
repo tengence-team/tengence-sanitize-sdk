@@ -99,6 +99,31 @@ const prompts = [
       };
     },
   },
+  {
+    name: 'sanitize_validate_linkage',
+    title: '验证脱敏-上报链路',
+    description:
+      '端到端验证"脱敏 → 上传 → 服务端可见"链路与测试环境：先读 sanitize://testing-patterns（已实测踩坑与正确用法），再执行验证步骤。',
+    argsSchema: z.object({
+      config: configArg,
+      input: z.string().describe('输入数据文件路径（CSV/JSON/JSONL/XLSX）'),
+      output: z.string().optional().describe('脱敏输出文件路径（默认输入同目录 *.sanitized.*）'),
+      push_url: z.string().optional().describe('上传接口覆盖（默认 https://api.mossego.com/v1/push/data）'),
+    }),
+    run(args) {
+      return {
+        description: '验证脱敏结果与真实推送契约',
+        messages: msg(
+          `验证一条"脱敏 → 上传 → 服务端确认"链路（config=${args.config}，input=${args.input}）。\n` +
+            `1) 先读资源 sanitize://testing-patterns —— 包含已验证的测试/验证经验：队列异步落盘（断言要等 ≥250ms 或看请求体）、自动采集事件混入队列（用 find 定位目标事件）、真实网关契约（成功码/主键/UNAUTHORIZED 瞬时重试）等，按其中正确用法执行；\n` +
+            `2) sanitize_config_info(config) 校验配置 → sanitize_dry_run 预览确认字段命中；\n` +
+            `3) sanitize_file 脱敏（输出 ${args.output || '自动命名'}）→ sanitize_upload 上传（push_url=${args.push_url || '默认 mossego 域'}，apiKey 来自环境变量）；\n` +
+            `4) 汇报：batchId、行数、accepted/rejected、unmatchedFields；上传失败时按 testing-patterns 的契约表区分瞬时（重试一次）与永久（核对 key），不要盲目重试。\n` +
+            `全程不输出原文。`
+        ),
+      };
+    },
+  },
 ];
 
 module.exports = { prompts };
