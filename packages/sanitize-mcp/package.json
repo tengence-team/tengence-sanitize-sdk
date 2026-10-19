@@ -1,0 +1,50 @@
+{
+  "name": "@tengence/sanitize-mcp",
+  "version": "0.1.0",
+  "description": "Tengence sanitize MCP server: local data desensitization (脱敏) before upload — config info / dry-run preview / sanitize file / upload / audit, plus methods & config-schema resources and workflow prompts; stdio + Streamable HTTP transports (MCP 2026-07-28, stateless core). The MCP bridge layer of @tengence/sanitize-sdk: plaintext NEVER leaves the user machine and never enters the AI context.",
+  "bin": {
+    "tengence-sanitize-mcp": "bin/sanitize-mcp.js",
+    "tengence-sanitize-mcp-http": "bin/sanitize-mcp-http.js"
+  },
+  "files": [
+    "bin/",
+    "server.js",
+    "tools/",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "keywords": [
+    "sanitize",
+    "data-masking",
+    "desensitization",
+    "mcp",
+    "model-context-protocol",
+    "agent",
+    "privacy"
+  ],
+  "license": "MIT",
+  "author": "Tengence Team",
+  "mcpName": "com.tengence/sanitize",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tengence-team/tengence-sanitize-sdk.git"
+  },
+  "homepage": "https://github.com/tengence-team/tengence-sanitize-sdk",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.3.1"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/node": "^2.1.1",
+    "@modelcontextprotocol/server": "^2.3.1",
+    "@tengence/sanitize-sdk": "0.1.0",
+    "zod": "^3.25 || ^4.0"
+  }
+}
