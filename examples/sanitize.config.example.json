@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "rules": [
+    { "fields": ["contact.phone", "phone"], "method": "hash", "params": { "algorithm": "SHA-256", "saltEnv": "TENGENCE_SANITIZE_SALT" } },
+    { "fields": ["user_id"], "method": "hash", "params": { "algorithm": "HMAC-SHA-256", "keyEnv": "TENGENCE_SANITIZE_KEY", "hashLength": 64 } },
+    { "fields": ["name"], "method": "mask", "params": { "keepFirst": 1, "keepLast": 1 } },
+    { "fields": ["id_card"], "method": "mask", "params": { "keepFirst": 4, "keepLast": 4 } },
+    { "fields": ["order_no"], "method": "encrypt", "params": { "keyEnv": "TENGENCE_SANITIZE_KEY" } },
+    { "fields": ["remark"], "method": "preserve" }
+  ],
+  "dryRun": false,
+  "upload": { "pushUrl": "https://api.tengence.com/v1/push/data" },
+  "audit": { "enabled": true, "dir": "./.tengence-sanitize-audit" }
+}
